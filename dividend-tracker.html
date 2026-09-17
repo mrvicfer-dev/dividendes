@@ -327,9 +327,12 @@ let userRecords = [];
 let activeYear = 'all';
 let charts = {};
 
-const STORAGE_KEY = 'divtracker_v2';
+const STORAGE_KEY = 'divtracker_v3';
 function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(userRecords)); } catch(e){} }
-function load() { try { const s = localStorage.getItem(STORAGE_KEY); if(s) userRecords = JSON.parse(s); } catch(e){} }
+function load() {
+  try { localStorage.removeItem('divtracker_v2'); } catch(e){} /* donnees 2026 desormais integrees au fichier : purge de l'ancien import duplique */
+  try { const s = localStorage.getItem(STORAGE_KEY); if(s) userRecords = JSON.parse(s); } catch(e){}
+}
 
 function allRecords() {
   return [...HISTORICAL, ...userRecords].sort((a,b) => a.date.localeCompare(b.date));
