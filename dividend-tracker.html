@@ -8,20 +8,20 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #0c0f16;
-    --surface: #141720;
-    --surface2: #1c2030;
-    --border: #262c3e;
-    --text: #e2e8f4;
-    --muted: #6b7590;
-    --green: #3ddc84;
-    --green-dim: #1a4033;
-    --green-bg: rgba(61,220,132,0.08);
-    --purple: #7c6fec;
-    --purple-dim: rgba(124,111,236,0.15);
-    --red: #f87171;
-    --red-dim: rgba(248,113,113,0.12);
-    --amber: #fbbf24;
+    --bg: #f5f7fa;
+    --surface: #ffffff;
+    --surface2: #eef1f6;
+    --border: #e3e8f0;
+    --text: #1e2433;
+    --muted: #64748b;
+    --green: #16a34a;
+    --green-dim: #dcfce7;
+    --green-bg: rgba(22,163,74,0.07);
+    --purple: #6366f1;
+    --purple-dim: rgba(99,102,241,0.12);
+    --red: #dc2626;
+    --red-dim: rgba(220,38,38,0.09);
+    --amber: #d97706;
   }
   body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
@@ -44,12 +44,12 @@
 
   /* BUTTONS */
   .btn { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: var(--surface2); color: var(--text); transition: all 0.15s; }
-  .btn:hover { border-color: #3a4260; background: #232840; }
-  .btn.primary { background: var(--green); color: #061a10; border-color: var(--green); }
-  .btn.primary:hover { background: #2ec870; }
-  .btn.ghost { background: transparent; border-color: #3a3060; color: var(--purple); }
+  .btn:hover { border-color: #cbd2df; background: #eef1f6; }
+  .btn.primary { background: var(--green); color: #ffffff; border-color: var(--green); }
+  .btn.primary:hover { background: #15803d; }
+  .btn.ghost { background: transparent; border-color: #cfcef8; color: var(--purple); }
   .btn.ghost:hover { background: var(--purple-dim); }
-  .btn.danger { background: transparent; border-color: #4a2020; color: var(--red); }
+  .btn.danger { background: transparent; border-color: #f3caca; color: var(--red); }
   .btn.danger:hover { background: var(--red-dim); }
 
   /* KPI GRID */
@@ -72,7 +72,7 @@
   .tscroll { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th { text-align: left; color: var(--muted); font-weight: 500; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; }
-  td { padding: 9px 12px; border-bottom: 1px solid #181c28; color: #c8cfe0; }
+  td { padding: 9px 12px; border-bottom: 1px solid #eef1f6; color: #374151; }
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: var(--surface2); }
 
@@ -104,13 +104,13 @@
   .m-input:focus { outline: none; border-color: var(--purple); }
 
   /* NOTICE */
-  .notice { background: var(--green-bg); border: 1px solid #1a4033; border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #5fe898; margin-bottom: 16px; }
+  .notice { background: var(--green-bg); border: 1px solid #bbf7d0; border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #15803d; margin-bottom: 16px; }
   .warning { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2); border-radius: 10px; padding: 12px 16px; font-size: 13px; color: var(--amber); margin-bottom: 16px; }
 
   /* YEAR FILTER */
   .year-filter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
   .year-btn { padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--muted); transition: all 0.12s; }
-  .year-btn.active { background: var(--surface2); color: var(--text); border-color: #3a4260; }
+  .year-btn.active { background: var(--surface2); color: var(--text); border-color: #cbd2df; }
   .year-btn:hover:not(.active) { color: var(--text); }
 </style>
 </head>
@@ -205,7 +205,7 @@
 
   <!-- DATA VIEW -->
   <div class="view" id="view-data">
-    <div class="notice">Les données historiques (mars 2020 – fév 2026) sont préremplies depuis ton fichier Excel, sous forme de totaux mensuels (1 entrée par mois, ticker "HIST"). Tu peux enrichir avec des données détaillées par ticker via import CSV.</div>
+    <div class="notice">Données préremplies de mars 2020 à septembre 2026. Jusqu'à février 2026 : totaux mensuels (ticker "HIST"). À partir de mars 2026 : détail par ETF. Tu peux enrichir via import CSV ou saisie manuelle.</div>
     <div class="warning">Format CSV : <code>date,ticker,montant</code> &nbsp;·&nbsp; ex : <code>2024-03-15,JGPI,125.50</code></div>
     <div class="section">
       <div class="section-head">Saisie manuelle</div>
@@ -269,17 +269,17 @@ const HISTORICAL = [
   {date:'2024-03-15',ticker:'HIST',amount:380.08},
   {date:'2024-04-15',ticker:'HIST',amount:94.03},
   {date:'2024-05-15',ticker:'HIST',amount:180.03},
-  {date:'2024-06-15',ticker:'HIST',amount:513.10},
+  {date:'2024-06-15',ticker:'HIST',amount:513.1},
   {date:'2024-07-15',ticker:'HIST',amount:304.73},
   {date:'2024-09-15',ticker:'HIST',amount:297.49},
   {date:'2024-10-15',ticker:'HIST',amount:199.74},
   {date:'2024-11-15',ticker:'HIST',amount:92.61},
-  {date:'2024-12-15',ticker:'HIST',amount:282.00},
+  {date:'2024-12-15',ticker:'HIST',amount:282.0},
   {date:'2025-01-15',ticker:'HIST',amount:187.92},
   {date:'2025-02-15',ticker:'HIST',amount:85.19},
   {date:'2025-03-15',ticker:'HIST',amount:105.35},
   {date:'2025-04-15',ticker:'HIST',amount:382.92},
-  {date:'2025-05-15',ticker:'HIST',amount:333.60},
+  {date:'2025-05-15',ticker:'HIST',amount:333.6},
   {date:'2025-06-15',ticker:'HIST',amount:169.66},
   {date:'2025-07-15',ticker:'HIST',amount:722.27},
   {date:'2025-09-15',ticker:'HIST',amount:104.49},
@@ -288,6 +288,38 @@ const HISTORICAL = [
   {date:'2025-12-15',ticker:'HIST',amount:274.09},
   {date:'2026-01-15',ticker:'HIST',amount:225.82},
   {date:'2026-02-15',ticker:'HIST',amount:270.87},
+  {date:'2026-03-03',ticker:'JPM Global Equity Premium Income',amount:92.68},
+  {date:'2026-03-30',ticker:'PIMCO US Short-Term HY Corp Bond',amount:55.37},
+  {date:'2026-04-04',ticker:'Vanguard FTSE All-World High Div Yield',amount:80.15},
+  {date:'2026-04-10',ticker:'Vanguard FTSE Emerging Markets',amount:22.15},
+  {date:'2026-04-10',ticker:'JPM Global Equity Premium Income',amount:80.22},
+  {date:'2026-04-10',ticker:'Vanguard S&P 500',amount:73.5},
+  {date:'2026-04-14',ticker:'IncomeShares Gold Yield ETP',amount:26.63},
+  {date:'2026-04-16',ticker:'iShares STOXX Global Select Dividend',amount:86.79},
+  {date:'2026-04-30',ticker:'PIMCO US Short-Term HY Corp Bond',amount:63.19},
+  {date:'2026-05-08',ticker:'JPM Global Equity Premium Income',amount:112.03},
+  {date:'2026-05-12',ticker:'IncomeShares Gold Yield ETP',amount:26.9},
+  {date:'2026-05-15',ticker:'HSBC MSCI World',amount:130.01},
+  {date:'2026-05-29',ticker:'PIMCO US Short-Term HY Corp Bond',amount:77.39},
+  {date:'2026-05-29',ticker:'iShares Core EURO STOXX 50',amount:185.84},
+  {date:'2026-06-05',ticker:'JPM Global Equity Premium Income',amount:191.45},
+  {date:'2026-06-12',ticker:'IncomeShares Gold Yield ETP',amount:26.73},
+  {date:'2026-06-30',ticker:'PIMCO US Short-Term HY Corp Bond',amount:65.47},
+  {date:'2026-07-01',ticker:'Vanguard FTSE All-World High Div Yield',amount:175.42},
+  {date:'2026-07-01',ticker:'Vanguard S&P 500',amount:88.39},
+  {date:'2026-07-01',ticker:'Vanguard FTSE Emerging Markets',amount:48.83},
+  {date:'2026-07-08',ticker:'JPM Global Equity Premium Income',amount:111.71},
+  {date:'2026-07-31',ticker:'PIMCO US Short-Term HY Corp Bond',amount:64.35},
+  {date:'2026-08-07',ticker:'JPM Global Equity Premium Income',amount:95.03},
+  {date:'2026-08-21',ticker:'HSBC MSCI World',amount:170.68},
+  {date:'2026-08-28',ticker:'PIMCO US Short-Term HY Corp Bond',amount:75.11},
+  {date:'2026-08-31',ticker:'iShares Core EURO STOXX 50',amount:230.76},
+  {date:'2026-09-09',ticker:'JPM Global Equity Premium Income',amount:112.38},
+  {date:'2026-09-14',ticker:'IncomeShares Gold Yield ETP',amount:26.35},
+  {date:'2026-09-30',ticker:'PIMCO US Short-Term HY Corp Bond',amount:66.72},
+  {date:'2026-09-30',ticker:'Vanguard S&P 500',amount:86.68},
+  {date:'2026-09-30',ticker:'Vanguard FTSE Emerging Markets',amount:49.88},
+  {date:'2026-09-30',ticker:'Vanguard FTSE All-World High Div Yield',amount:98.24},
 ];
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
@@ -344,11 +376,11 @@ function groupByYear() {
 
 // ─── CHART helpers ───────────────────────────────────────────────────────────
 function destroyChart(id) { if(charts[id]) { charts[id].destroy(); delete charts[id]; } }
-const C_GREEN = '#3ddc84', C_GREEN_DIM = 'rgba(61,220,132,0.15)';
-const C_PURPLE = '#7c6fec', C_PURPLE_DIM = 'rgba(124,111,236,0.12)';
-const C_AMBER = '#fbbf24';
-const GRID = 'rgba(255,255,255,0.06)';
-const TICK = '#6b7590';
+const C_GREEN = '#16a34a', C_GREEN_DIM = 'rgba(22,163,74,0.12)';
+const C_PURPLE = '#6366f1', C_PURPLE_DIM = 'rgba(99,102,241,0.14)';
+const C_AMBER = '#d97706';
+const GRID = 'rgba(30,36,51,0.08)';
+const TICK = '#64748b';
 const axisY = { ticks:{color:TICK,callback:v=>'€'+v.toLocaleString('fr-FR')}, grid:{color:GRID} };
 const axisX = { ticks:{color:TICK,font:{size:11},maxRotation:45,autoSkip:true}, grid:{color:'transparent'} };
 const noLegend = { legend:{display:false} };
@@ -450,7 +482,7 @@ function renderQuarterly() {
       type:'bar',
       data:{
         labels: keys,
-        datasets:[{label:'Dividendes',data:keys.map(k=>parseFloat(qData[k].toFixed(2))),backgroundColor:'rgba(124,111,236,0.15)',borderColor:C_PURPLE,borderWidth:1.5,borderRadius:4}]
+        datasets:[{label:'Dividendes',data:keys.map(k=>parseFloat(qData[k].toFixed(2))),backgroundColor:'rgba(99,102,241,0.16)',borderColor:C_PURPLE,borderWidth:1.5,borderRadius:4}]
       },
       options:{ responsive:true, maintainAspectRatio:false, plugins:noLegend, scales:{x:axisX,y:axisY} }
     });
@@ -534,7 +566,7 @@ function renderProjections() {
         labels:[...hL,...pYears],
         datasets:[
           {label:'Historique',data:[...hV,...Array(horizon).fill(null)],borderColor:C_GREEN,backgroundColor:C_GREEN_DIM,fill:true,tension:0.35,pointRadius:4,pointBackgroundColor:C_GREEN},
-          {label:'Projection',data:[...Array(hL.length-1).fill(null),hV[hV.length-1],...pVals],borderColor:C_AMBER,backgroundColor:'rgba(251,191,36,0.08)',fill:true,tension:0.35,borderDash:[5,4],pointRadius:3,pointBackgroundColor:C_AMBER}
+          {label:'Projection',data:[...Array(hL.length-1).fill(null),hV[hV.length-1],...pVals],borderColor:C_AMBER,backgroundColor:'rgba(217,119,6,0.10)',fill:true,tension:0.35,borderDash:[5,4],pointRadius:3,pointBackgroundColor:C_AMBER}
         ]
       },
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:TICK,boxWidth:12,boxHeight:12,font:{size:12}}}},scales:{x:{...axisX,ticks:{color:TICK,font:{size:11},maxRotation:45,autoSkip:true}},y:axisY}}
