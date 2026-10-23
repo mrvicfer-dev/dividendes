@@ -59,6 +59,7 @@
   .kpi-val { font-size: 24px; font-weight: 600; letter-spacing: -0.5px; }
   .kpi-val.green { color: var(--green); }
   .kpi-val.amber { color: var(--amber); }
+  .kpi-val.red { color: var(--red); }
   .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
   /* SECTIONS */
@@ -123,6 +124,7 @@
       <button class="tab" onclick="showTab('quarterly',this)">Trimestriel</button>
       <button class="tab" onclick="showTab('annual',this)">Annuel</button>
       <button class="tab" onclick="showTab('projections',this)">Projections</button>
+      <button class="tab" onclick="showTab('loan',this)">Emprunt</button>
       <button class="tab" onclick="showTab('data',this)">Données</button>
     </div>
   </div>
@@ -219,6 +221,37 @@
     <div class="section">
       <div class="section-head">Enregistrements (<span id="recCount">0</span>)</div>
       <div class="tscroll"><table id="tAll"><thead><tr><th>Date</th><th>Ticker</th><th>Montant</th><th></th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- LOAN VIEW -->
+  <div class="view" id="view-loan">
+    <div class="notice">Comparaison entre tes dividendes encaissés et le coût de ton levier (intérêts débiteurs DEGIRO). Les dividendes se mettent à jour tout seuls depuis l'onglet Données. Les intérêts sont préremplis depuis ton relevé ; tu peux en ajouter chaque mois.</div>
+    <div class="kpis">
+      <div class="kpi"><div class="kpi-label">Intérêts payés</div><div class="kpi-val red" id="L0">—</div><div class="kpi-sub" id="L0s">depuis le début du levier</div></div>
+      <div class="kpi"><div class="kpi-label">Dividendes même période</div><div class="kpi-val green" id="L1">—</div><div class="kpi-sub" id="L1s">—</div></div>
+      <div class="kpi"><div class="kpi-label">Solde net</div><div class="kpi-val" id="L2">—</div><div class="kpi-sub">dividendes moins intérêts</div></div>
+      <div class="kpi"><div class="kpi-label">Taux de couverture</div><div class="kpi-val" id="L3">—</div><div class="kpi-sub" id="L3s">dividendes / intérêts</div></div>
+    </div>
+    <div class="section">
+      <div class="section-head">Dividendes vs intérêts par mois</div>
+      <div class="chart-wrap" style="height:260px"><canvas id="cLoan" role="img" aria-label="Dividendes versus intérêts par mois"></canvas></div>
+    </div>
+    <div class="section">
+      <div class="section-head">Saisie d'un intérêt</div>
+      <div class="manual-row">
+        <input type="date" class="m-input" id="iDate" style="width:155px">
+        <input type="number" class="m-input" id="iAmount" placeholder="Intérêt €" step="0.01" style="width:130px">
+        <button class="btn primary" onclick="addInterest()">Ajouter</button>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-head">Comparatif mensuel</div>
+      <div class="tscroll"><table id="tLoan"><thead><tr><th>Mois</th><th>Dividendes</th><th>Intérêts</th><th>Net</th><th>Couverture</th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="section">
+      <div class="section-head">Intérêts enregistrés (<span id="intCount">0</span>)</div>
+      <div class="tscroll"><table id="tInt"><thead><tr><th>Date</th><th>Intérêt</th><th></th></tr></thead><tbody></tbody></table></div>
     </div>
   </div>
 </div>
@@ -657,6 +690,98 @@ function addManual(){
   document.getElementById('mAmount').value='';
 }
 
+// ─── EMPRUNT / INTÉRÊTS ──────────────────────────────────────────────────────
+/* Intérêts débiteurs mensuels préremplis depuis le relevé DEGIRO (coût du levier) */
+const INTEREST_HIST = [
+  {date:'2024-12-06',amount:85.91},
+  {date:'2025-01-07',amount:56.45},
+  {date:'2025-02-13',amount:48.59},
+  {date:'2025-03-06',amount:19.46},
+  {date:'2025-04-04',amount:20.82},
+  {date:'2025-05-07',amount:303.33},
+  {date:'2025-06-04',amount:255.56},
+  {date:'2025-07-04',amount:223.68},
+  {date:'2025-08-07',amount:224.59},
+  {date:'2025-09-03',amount:221.01},
+  {date:'2025-10-03',amount:213.11},
+  {date:'2025-11-04',amount:234.28},
+  {date:'2025-12-09',amount:214.27},
+  {date:'2026-01-06',amount:284.75},
+  {date:'2026-02-10',amount:293.91},
+  {date:'2026-03-04',amount:257.17},
+  {date:'2026-04-08',amount:274.52},
+  {date:'2026-05-12',amount:274.33},
+  {date:'2026-06-05',amount:282.88},
+  {date:'2026-07-07',amount:272.95},
+  {date:'2026-08-10',amount:299.48},
+  {date:'2026-09-08',amount:261.72},
+  {date:'2026-10-07',amount:269.63},
+];
+const INT_KEY = 'divtracker_interest_v1';
+let userInterest = [];
+function saveInterest(){ try { localStorage.setItem(INT_KEY, JSON.stringify(userInterest)); } catch(e){} }
+function loadInterest(){ try { const s = localStorage.getItem(INT_KEY); if(s) userInterest = JSON.parse(s); } catch(e){} }
+function allInterest(){ return [...INTEREST_HIST, ...userInterest].sort((a,b)=>a.date.localeCompare(b.date)); }
+function groupInterestByMonth(){ const m={}; allInterest().forEach(r=>{ const k=r.date.substring(0,7); m[k]=(m[k]||0)+r.amount; }); return m; }
+
+function renderLoan(){
+  const divM = groupByMonth();
+  const intM = groupInterestByMonth();
+  const intKeys = Object.keys(intM).sort();
+  const start = intKeys[0] || null;
+  const totInt = Object.values(intM).reduce((s,v)=>s+v,0);
+  const divSince = start ? Object.entries(divM).filter(([k])=>k>=start).reduce((s,[,v])=>s+v,0) : 0;
+  const net = divSince - totInt;
+  const cov = totInt>0 ? (divSince/totInt*100) : 0;
+
+  document.getElementById('L0').textContent = totInt? fmt(totInt):'—';
+  document.getElementById('L0s').textContent = start? 'depuis '+mo(start) : 'aucun intérêt saisi';
+  document.getElementById('L1').textContent = totInt? fmt(divSince):'—';
+  document.getElementById('L1s').textContent = start? 'depuis '+mo(start) : '—';
+  const L2=document.getElementById('L2'); L2.textContent = totInt? fmt(net):'—'; L2.className='kpi-val '+(net>=0?'green':'red');
+  const L3=document.getElementById('L3'); L3.textContent = totInt? Math.round(cov)+'%':'—'; L3.className='kpi-val '+(cov>=100?'green':'red');
+
+  let keys = [...new Set([...Object.keys(divM), ...Object.keys(intM)])].sort();
+  if(start) keys = keys.filter(k=>k>=start);
+
+  destroyChart('loan');
+  const ctx=document.getElementById('cLoan');
+  if(ctx && keys.length){
+    charts['loan']=new Chart(ctx,{ type:'bar',
+      data:{ labels:keys.map(mo), datasets:[
+        {label:'Dividendes', data:keys.map(k=>parseFloat((divM[k]||0).toFixed(2))), backgroundColor:C_GREEN_DIM, borderColor:C_GREEN, borderWidth:1.5, borderRadius:4},
+        {label:'Intérêts', data:keys.map(k=>parseFloat((intM[k]||0).toFixed(2))), backgroundColor:'rgba(220,38,38,0.12)', borderColor:'#dc2626', borderWidth:1.5, borderRadius:4},
+      ]},
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:true, labels:{color:TICK, boxWidth:12, font:{size:12}}}}, scales:{x:axisX,y:axisY} }
+    });
+  }
+
+  const tb=document.querySelector('#tLoan tbody'); tb.innerHTML='';
+  [...keys].reverse().forEach(k=>{
+    const d=divM[k]||0, i=intM[k]||0, n=d-i;
+    const c = i>0? Math.round(d/i*100)+'%' : (d>0?'∞':'—');
+    tb.innerHTML += `<tr><td>${mo(k)}</td><td>${fmt(d)}</td><td>${fmt(i)}</td><td><span class="${n>=0?'pos':'neg'}">${fmt(n)}</span></td><td>${c}</td></tr>`;
+  });
+
+  const all=allInterest();
+  document.getElementById('intCount').textContent = all.length;
+  const tbi=document.querySelector('#tInt tbody'); tbi.innerHTML='';
+  [...all].reverse().forEach(r=>{
+    const ui = userInterest.findIndex(u=>u.date===r.date && u.amount===r.amount);
+    tbi.innerHTML += `<tr><td>${r.date}</td><td>${fmt(r.amount)}</td><td>${ui>=0?`<button class="btn danger" style="padding:2px 9px;font-size:11px" onclick="delInterest(${ui})">×</button>`:''}</td></tr>`;
+  });
+}
+function addInterest(){
+  const d=document.getElementById('iDate').value, m=parseFloat(document.getElementById('iAmount').value);
+  if(!d || isNaN(m)){ alert('Date et montant requis'); return; }
+  userInterest.push({date:d, amount:Math.abs(m)});
+  userInterest.sort((a,b)=>a.date.localeCompare(b.date));
+  saveInterest();
+  document.getElementById('iDate').value=''; document.getElementById('iAmount').value='';
+  renderLoan();
+}
+function delInterest(i){ userInterest.splice(i,1); saveInterest(); renderLoan(); }
+
 // ─── NAV ─────────────────────────────────────────────────────────────────────
 let currentTab = 'monthly';
 function showTab(name,btn){
@@ -672,12 +797,14 @@ function renderCurrent(){
   else if(currentTab==='quarterly') renderQuarterly();
   else if(currentTab==='annual') renderAnnual();
   else if(currentTab==='projections') renderProjections();
+  else if(currentTab==='loan') renderLoan();
   else if(currentTab==='data') renderDataTable();
 }
 function updateAll(){ updateKPIs(); renderCurrent(); }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 load();
+loadInterest();
 updateAll();
 </script>
 </body>
